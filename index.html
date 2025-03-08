@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استخراج رنگ‌ها از تصویر</title>
+<style>
+   /* Reset برخی از استایل‌های پیش‌فرض مرورگر */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* استایل‌های کلی صفحه */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* استایل‌های کانتینر اصلی */
+.container {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    max-width: 800px;
+    width: 100%;
+    text-align: center;
+    animation: fadeIn 1s ease-in-out;
+}
+
+/* انیمیشن fadeIn برای ظاهر شدن کانتینر */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* استایل‌های عنوان */
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #333;
+    animation: slideIn 1s ease-in-out;
+}
+
+/* انیمیشن slideIn برای عنوان */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* استایل‌های فایل اینپوت */
+#imageInput {
+    display: none; /* مخفی کردن فایل اینپوت اصلی */
+}
+
+.custom-file-upload {
+    display: inline-block;
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #fff;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    animation: bounce 2s infinite;
+}
+
+.custom-file-upload:hover {
+    background: linear-gradient(135deg, #2575fc, #6a11cb);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* انیمیشن bounce برای دکمه */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* استایل‌های کانتینر تصویر */
+#imageContainer {
+    margin: 30px 0;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    animation: zoomIn 1s ease-in-out;
+}
+
+#imageContainer img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* انیمیشن zoomIn برای تصویر */
+@keyframes zoomIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* استایل‌های کانتینر رنگ‌ها */
+#colorContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+    animation: fadeInUp 1s ease-in-out;
+}
+
+.color-box {
+    width: 120px;
+    height: 120px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.1rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.color-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* انیمیشن fadeInUp برای رنگ‌ها */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>استخراج رنگ‌ها از تصویر</h1>
+    <label for="imageInput" class="custom-file-upload">
+        انتخاب تصویر
+    </label>
+    <input type="file" id="imageInput" accept="image/*">
+    <div id="imageContainer"></div>
+    <div id="colorContainer"></div>
+</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.min.js"></script>
+   <script>
+document.getElementById('imageInput').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = function() {
+                const imageContainer = document.getElementById('imageContainer');
+                imageContainer.innerHTML = '';
+                imageContainer.appendChild(img);
+
+                const colorThief = new ColorThief();
+                const colorContainer = document.getElementById('colorContainer');
+                colorContainer.innerHTML = '';
+
+                const colors = colorThief.getPalette(img, 5); // تعداد رنگ‌هایی که می‌خواهیم استخراج کنیم
+
+                colors.forEach(color => {
+                    const colorHex = rgbToHex(color[0], color[1], color[2]);
+                    const colorBox = document.createElement('div');
+                    colorBox.className = 'color-box';
+                    colorBox.style.backgroundColor = colorHex;
+
+                    const colorText = document.createElement('p');
+                    colorText.textContent = colorHex;
+                    colorBox.appendChild(colorText);
+
+                    colorContainer.appendChild(colorBox);
+                });
+            };
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+   </script>
+
+</body>
+</html>
